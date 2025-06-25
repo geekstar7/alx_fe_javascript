@@ -1,7 +1,10 @@
 let quotes = [];
-let selectedCategory = "all"; // ✅ Explicitly define selectedCategory
+let selectedCategory = "all";
 
-// Load from localStorage or default
+const SYNC_INTERVAL = 60000; // 60 seconds
+const MOCK_API_URL = "https://jsonplaceholder.typicode.com/posts";
+
+// Load from localStorage or defaults
 function loadQuotes() {
   const storedQuotes = localStorage.getItem("quotes");
   quotes = storedQuotes ? JSON.parse(storedQuotes) : [
@@ -24,7 +27,7 @@ function getLastSelectedCategory() {
   return localStorage.getItem("lastSelectedCategory") || "all";
 }
 
-// Populate the category filter dropdown
+// Populate category dropdown
 function populateCategories() {
   const categoryFilter = document.getElementById("categoryFilter");
   const storedCategory = getLastSelectedCategory();
@@ -42,7 +45,7 @@ function populateCategories() {
   });
 }
 
-// Show a quote from the selected category
+// Show a random quote from selected category
 function showRandomQuote() {
   const filteredQuotes = selectedCategory === "all"
     ? quotes
@@ -61,13 +64,13 @@ function showRandomQuote() {
   saveLastSelectedCategory(selectedCategory);
 }
 
-// Called when dropdown changes
+// Update selectedCategory and show filtered quote
 function filterQuotes() {
-  selectedCategory = document.getElementById("categoryFilter").value; // ✅ Update global
+  selectedCategory = document.getElementById("categoryFilter").value;
   showRandomQuote();
 }
 
-// Restore last quote
+// Restore previous session quote
 function restoreLastState() {
   const last = sessionStorage.getItem("lastQuote");
   if (last) {
@@ -76,7 +79,7 @@ function restoreLastState() {
   }
 }
 
-// Add a new quote
+// Add quote dynamically
 function addQuote() {
   const quoteInput = document.getElementById("newQuoteText");
   const categoryInput = document.getElementById("newQuoteCategory");
@@ -98,7 +101,7 @@ function addQuote() {
   alert("New quote added!");
 }
 
-// Create quote form dynamically
+// Build add quote form
 function createAddQuoteForm() {
   const formTitle = document.createElement("h3");
   formTitle.textContent = "Add a New Quote";
@@ -125,7 +128,7 @@ function createAddQuoteForm() {
   formContainer.appendChild(addButton);
 }
 
-// Export to JSON
+// Export quotes to JSON
 function exportToJson() {
   const blob = new Blob([JSON.stringify(quotes, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -138,7 +141,7 @@ function exportToJson() {
   document.body.removeChild(link);
 }
 
-// Import from JSON
+// Import quotes from JSON
 function importFromJsonFile(event) {
   const fileReader = new FileReader();
   fileReader.onload = function(e) {
@@ -156,7 +159,60 @@ function importFromJsonFile(event) {
   fileReader.readAsText(event.target.files[0]);
 }
 
-// App Initialization
+// Fetch mock quotes from server
+async function fetchFromServer() {
+  try {
+    const response = await fetch(MOCK_API_URL);
+    const data = await response.json();
+
+    // Simulate conversion to quote format
+    return data.slice(0, 3).map((post, i) => ({
+      text: post.title,
+      category: ["Inspiration", "Motivation", "Action"][i % 3]
+    }));
+  } catch (err) {
+    console.error("Failed to fetch from server:", err);
+    return [];
+  }
+}
+
+// Simulate sync with server
+async function syncWithServer() {
+  const serverQuotes = await fetchFromServer();
+  let newQuotes = 0;
+
+  for (const serverQuote of serverQuotes) {
+    const exists = quotes.some(q => q.text === serverQuote.text);
+    if (!exists) {
+      quotes.push(serverQuote);
+      newQuotes++;
+    }
+  }
+
+  if (newQuotes > 0) {
+    saveQuotes();
+    populateCategories();
+    notifySync(`🔄 Synced ${newQuotes} new quotes from server`);
+  } else {
+    notifySync(`✔ Already up-to-date`);
+  }
+}
+
+// Show sync status temporarily
+function notifySync(message) {
+  const syncNotice = document.getElementById("syncNotice");
+  syncNotice.textContent = message;
+  setTimeout(() => {
+    syncNotice.textContent = "";
+  }, 5000);
+}
+
+// Run auto-sync every minute
+function startPeriodicSync() {
+  setInterval(syncWithServer, SYNC_INTERVAL);
+}
+
+// App bootstrapping
 const quoteDisplay = document.getElementById("quoteDisplay");
 const formContainer = document.getElementById("formContainer");
 
@@ -164,3 +220,4 @@ loadQuotes();
 populateCategories();
 createAddQuoteForm();
 restoreLastState();
+startPeriodicSync();

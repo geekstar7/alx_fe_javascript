@@ -23,6 +23,10 @@
     .form-section {
       margin-top: 20px;
     }
+    #syncNotice {
+      color: green;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -36,6 +40,8 @@
     <button onclick="showRandomQuote()">Show New Quote</button>
     <button onclick="exportToJson()">Export Quotes (JSON)</button>
     <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
+    <button onclick="syncWithServer()">🔁 Sync Now</button>
+    <p id="syncNotice"></p>
   </div>
 
   <div id="quoteDisplay">Click "Show New Quote" to display a quote.</div>
@@ -45,4 +51,3 @@
   <script src="script.js"></script>
 </body>
 </html>
-
