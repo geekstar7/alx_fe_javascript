@@ -8,12 +8,12 @@ const quotes = [
 const quoteDisplay = document.getElementById("quoteDisplay");
 const newQuoteBtn = document.getElementById("newQuote");
 const categoryFilter = document.getElementById("categoryFilter");
+const formContainer = document.getElementById("formContainer");
 
 // Populate category dropdown
 function updateCategoryOptions() {
   const categories = [...new Set(quotes.map(q => q.category))];
-  categoryFilter.innerHTML = '<option value="all">All</option>'; // Reset
-
+  categoryFilter.innerHTML = '<option value="all">All</option>';
   categories.forEach(cat => {
     const option = document.createElement("option");
     option.value = cat;
@@ -22,7 +22,7 @@ function updateCategoryOptions() {
   });
 }
 
-// Show random quote based on selected category
+// Show random quote based on category
 function showRandomQuote() {
   const selectedCategory = categoryFilter.value;
   let filteredQuotes = quotes;
@@ -41,10 +41,13 @@ function showRandomQuote() {
   quoteDisplay.textContent = `"${quote.text}" — ${quote.category}`;
 }
 
-// Add a new quote dynamically
+// Add quote from form
 function addQuote() {
-  const text = document.getElementById("newQuoteText").value.trim();
-  const category = document.getElementById("newQuoteCategory").value.trim();
+  const quoteInput = document.getElementById("newQuoteText");
+  const categoryInput = document.getElementById("newQuoteCategory");
+
+  const text = quoteInput.value.trim();
+  const category = categoryInput.value.trim();
 
   if (text === "" || category === "") {
     alert("Please enter both quote and category.");
@@ -52,15 +55,41 @@ function addQuote() {
   }
 
   quotes.push({ text, category });
-  document.getElementById("newQuoteText").value = "";
-  document.getElementById("newQuoteCategory").value = "";
+  quoteInput.value = "";
+  categoryInput.value = "";
 
   updateCategoryOptions();
   alert("New quote added!");
 }
 
-// Event Listeners
-newQuoteBtn.addEventListener("click", showRandomQuote);
+// ✅ Dynamically create the form using DOM manipulation
+function createAddQuoteForm() {
+  const formTitle = document.createElement("h3");
+  formTitle.textContent = "Add a New Quote";
 
-// Initialize category dropdown on load
+  const quoteInput = document.createElement("input");
+  quoteInput.id = "newQuoteText";
+  quoteInput.type = "text";
+  quoteInput.placeholder = "Enter a new quote";
+
+  const categoryInput = document.createElement("input");
+  categoryInput.id = "newQuoteCategory";
+  categoryInput.type = "text";
+  categoryInput.placeholder = "Enter quote category";
+
+  const addButton = document.createElement("button");
+  addButton.textContent = "Add Quote";
+  addButton.onclick = addQuote;
+
+  formContainer.appendChild(formTitle);
+  formContainer.appendChild(quoteInput);
+  formContainer.appendChild(document.createElement("br"));
+  formContainer.appendChild(categoryInput);
+  formContainer.appendChild(document.createElement("br"));
+  formContainer.appendChild(addButton);
+}
+
+// Initialize app
+newQuoteBtn.addEventListener("click", showRandomQuote);
 updateCategoryOptions();
+createAddQuoteForm(); // ✅ Call to generate the form dynamically
