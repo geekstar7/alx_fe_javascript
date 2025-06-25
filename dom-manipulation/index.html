@@ -16,7 +16,7 @@
       background-color: #eef;
       border-left: 4px solid #339;
     }
-    input, button {
+    input, button, select {
       margin: 5px 0;
       padding: 8px;
     }
@@ -30,10 +30,10 @@
 
   <div>
     <label for="categoryFilter">Choose Category:</label>
-    <select id="categoryFilter">
-      <option value="all">All</option>
+    <select id="categoryFilter" onchange="filterQuotes()">
+      <option value="all">All Categories</option>
     </select>
-    <button id="newQuote">Show New Quote</button>
+    <button onclick="showRandomQuote()">Show New Quote</button>
     <button onclick="exportToJson()">Export Quotes (JSON)</button>
     <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
   </div>
