@@ -1,10 +1,10 @@
 let quotes = [];
 let selectedCategory = "all";
 
-const SYNC_INTERVAL = 60000; // 60 seconds
+const SYNC_INTERVAL = 60000;
 const MOCK_API_URL = "https://jsonplaceholder.typicode.com/posts";
 
-// Load quotes from localStorage or use defaults
+// Load quotes from local storage or defaults
 function loadQuotes() {
   const storedQuotes = localStorage.getItem("quotes");
   quotes = storedQuotes ? JSON.parse(storedQuotes) : [
@@ -14,12 +14,10 @@ function loadQuotes() {
   ];
 }
 
-// Save quotes to localStorage
 function saveQuotes() {
   localStorage.setItem("quotes", JSON.stringify(quotes));
 }
 
-// Store and restore last selected category
 function saveLastSelectedCategory(category) {
   localStorage.setItem("lastSelectedCategory", category);
 }
@@ -28,7 +26,6 @@ function getLastSelectedCategory() {
   return localStorage.getItem("lastSelectedCategory") || "all";
 }
 
-// Populate dropdown with categories
 function populateCategories() {
   const categoryFilter = document.getElementById("categoryFilter");
   const storedCategory = getLastSelectedCategory();
@@ -46,7 +43,6 @@ function populateCategories() {
   });
 }
 
-// Show a random quote from selected category
 function showRandomQuote() {
   const filteredQuotes = selectedCategory === "all"
     ? quotes
@@ -65,13 +61,11 @@ function showRandomQuote() {
   saveLastSelectedCategory(selectedCategory);
 }
 
-// Handle category selection
 function filterQuotes() {
   selectedCategory = document.getElementById("categoryFilter").value;
   showRandomQuote();
 }
 
-// Restore last viewed quote
 function restoreLastState() {
   const last = sessionStorage.getItem("lastQuote");
   if (last) {
@@ -80,7 +74,6 @@ function restoreLastState() {
   }
 }
 
-// Add quote and sync to server
 function addQuote() {
   const quoteInput = document.getElementById("newQuoteText");
   const categoryInput = document.getElementById("newQuoteCategory");
@@ -105,7 +98,6 @@ function addQuote() {
   alert("New quote added and synced to server!");
 }
 
-// Build dynamic form
 function createAddQuoteForm() {
   const formTitle = document.createElement("h3");
   formTitle.textContent = "Add a New Quote";
@@ -132,7 +124,6 @@ function createAddQuoteForm() {
   formContainer.appendChild(addButton);
 }
 
-// Export quotes as JSON
 function exportToJson() {
   const blob = new Blob([JSON.stringify(quotes, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -145,7 +136,6 @@ function exportToJson() {
   document.body.removeChild(link);
 }
 
-// Import quotes from JSON file
 function importFromJsonFile(event) {
   const fileReader = new FileReader();
   fileReader.onload = function(e) {
@@ -163,7 +153,7 @@ function importFromJsonFile(event) {
   fileReader.readAsText(event.target.files[0]);
 }
 
-// ✅ Fetch quotes from mock server
+// ✅ GET from mock server
 async function fetchQuotesFromServer() {
   try {
     const response = await fetch(MOCK_API_URL);
@@ -179,7 +169,7 @@ async function fetchQuotesFromServer() {
   }
 }
 
-// ✅ POST quote to mock server
+// ✅ POST to mock server with headers
 async function sendQuoteToServer(quote) {
   try {
     const response = await fetch(MOCK_API_URL, {
@@ -200,7 +190,7 @@ async function sendQuoteToServer(quote) {
   }
 }
 
-// Sync with server and resolve conflicts (server wins)
+// Pull data from server and merge
 async function syncWithServer() {
   const serverQuotes = await fetchQuotesFromServer();
   let newQuotes = 0;
@@ -216,4 +206,20 @@ async function syncWithServer() {
   if (newQuotes > 0) {
     saveQuotes();
     populateCategories();
-    notifySync(`🔄 Synced ${newQuotes} new quotes from s
+    notifySync(`🔄 Synced ${newQuotes} new quotes from server`);
+  } else {
+    notifySync(`✔ Already up-to-date`);
+  }
+}
+
+//  New wrapper function
+function syncQuotes() {
+  syncWithServer();
+}
+
+// Show status for syncing
+function notifySync(message) {
+  const syncNotice = document.getElementById("syncNotice");
+  syncNotice.textContent = message;
+  setTimeout(() => {
+    syncNotice.textContent = "";
