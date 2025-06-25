@@ -34,6 +34,8 @@
       <option value="all">All</option>
     </select>
     <button id="newQuote">Show New Quote</button>
+    <button onclick="exportToJson()">Export Quotes (JSON)</button>
+    <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
   </div>
 
   <div id="quoteDisplay">Click "Show New Quote" to display a quote.</div>
