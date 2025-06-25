@@ -1,10 +1,10 @@
 let quotes = [];
 let selectedCategory = "all";
 
-const SYNC_INTERVAL = 60000;
+const SYNC_INTERVAL = 60000; // 60 seconds
 const MOCK_API_URL = "https://jsonplaceholder.typicode.com/posts";
 
-// Load quotes from local storage or defaults
+// Load from localStorage or defaults
 function loadQuotes() {
   const storedQuotes = localStorage.getItem("quotes");
   quotes = storedQuotes ? JSON.parse(storedQuotes) : [
@@ -14,18 +14,20 @@ function loadQuotes() {
   ];
 }
 
+// Save to localStorage
 function saveQuotes() {
   localStorage.setItem("quotes", JSON.stringify(quotes));
 }
 
+// Handle category preferences
 function saveLastSelectedCategory(category) {
   localStorage.setItem("lastSelectedCategory", category);
 }
-
 function getLastSelectedCategory() {
   return localStorage.getItem("lastSelectedCategory") || "all";
 }
 
+// Populate dropdown
 function populateCategories() {
   const categoryFilter = document.getElementById("categoryFilter");
   const storedCategory = getLastSelectedCategory();
@@ -43,6 +45,7 @@ function populateCategories() {
   });
 }
 
+// Display random quote
 function showRandomQuote() {
   const filteredQuotes = selectedCategory === "all"
     ? quotes
@@ -61,11 +64,13 @@ function showRandomQuote() {
   saveLastSelectedCategory(selectedCategory);
 }
 
+// On dropdown change
 function filterQuotes() {
   selectedCategory = document.getElementById("categoryFilter").value;
   showRandomQuote();
 }
 
+// Restore last quote
 function restoreLastState() {
   const last = sessionStorage.getItem("lastQuote");
   if (last) {
@@ -74,6 +79,7 @@ function restoreLastState() {
   }
 }
 
+// Add new quote
 function addQuote() {
   const quoteInput = document.getElementById("newQuoteText");
   const categoryInput = document.getElementById("newQuoteCategory");
@@ -98,6 +104,7 @@ function addQuote() {
   alert("New quote added and synced to server!");
 }
 
+// Add form dynamically
 function createAddQuoteForm() {
   const formTitle = document.createElement("h3");
   formTitle.textContent = "Add a New Quote";
@@ -124,11 +131,11 @@ function createAddQuoteForm() {
   formContainer.appendChild(addButton);
 }
 
+// Export quotes
 function exportToJson() {
   const blob = new Blob([JSON.stringify(quotes, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
-
   link.href = url;
   link.download = "quotes.json";
   document.body.appendChild(link);
@@ -136,6 +143,7 @@ function exportToJson() {
   document.body.removeChild(link);
 }
 
+// Import quotes
 function importFromJsonFile(event) {
   const fileReader = new FileReader();
   fileReader.onload = function(e) {
@@ -153,7 +161,7 @@ function importFromJsonFile(event) {
   fileReader.readAsText(event.target.files[0]);
 }
 
-// ✅ GET from mock server
+// Fetch from server
 async function fetchQuotesFromServer() {
   try {
     const response = await fetch(MOCK_API_URL);
@@ -169,7 +177,7 @@ async function fetchQuotesFromServer() {
   }
 }
 
-// ✅ POST to mock server with headers
+// Post to server
 async function sendQuoteToServer(quote) {
   try {
     const response = await fetch(MOCK_API_URL, {
@@ -190,7 +198,7 @@ async function sendQuoteToServer(quote) {
   }
 }
 
-// Pull data from server and merge
+// Merge quotes from server
 async function syncWithServer() {
   const serverQuotes = await fetchQuotesFromServer();
   let newQuotes = 0;
@@ -212,14 +220,31 @@ async function syncWithServer() {
   }
 }
 
-//  New wrapper function
+// Wrapper for manual sync
 function syncQuotes() {
   syncWithServer();
 }
 
-// Show status for syncing
+// Show sync status
 function notifySync(message) {
   const syncNotice = document.getElementById("syncNotice");
   syncNotice.textContent = message;
   setTimeout(() => {
     syncNotice.textContent = "";
+  }, 5000);
+}
+
+// Periodic sync
+function startPeriodicSync() {
+  setInterval(syncWithServer, SYNC_INTERVAL);
+}
+
+// Init
+const quoteDisplay = document.getElementById("quoteDisplay");
+const formContainer = document.getElementById("formContainer");
+
+loadQuotes();
+populateCategories();
+createAddQuoteForm();
+restoreLastState();
+startPeriodicSync();
