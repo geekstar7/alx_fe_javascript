@@ -4,7 +4,6 @@ let selectedCategory = "all";
 const SYNC_INTERVAL = 60000;
 const MOCK_API_URL = "https://jsonplaceholder.typicode.com/posts";
 
-// Load from localStorage or defaults
 function loadQuotes() {
   const storedQuotes = localStorage.getItem("quotes");
   quotes = storedQuotes ? JSON.parse(storedQuotes) : [
@@ -113,8 +112,8 @@ function createAddQuoteForm() {
   categoryInput.placeholder = "Enter quote category";
 
   const addButton = document.createElement("button");
+  addButton.id = "addQuoteBtn";
   addButton.textContent = "Add Quote";
-  addButton.onclick = addQuote;
 
   formContainer.appendChild(formTitle);
   formContainer.appendChild(quoteInput);
@@ -156,7 +155,6 @@ async function fetchQuotesFromServer() {
   try {
     const response = await fetch(MOCK_API_URL);
     const data = await response.json();
-
     return data.slice(0, 3).map((post, i) => ({
       text: post.title,
       category: ["Inspiration", "Motivation", "Action"][i % 3]
@@ -171,9 +169,7 @@ async function sendQuoteToServer(quote) {
   try {
     const response = await fetch(MOCK_API_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(quote)
     });
 
@@ -203,6 +199,7 @@ async function syncWithServer() {
     saveQuotes();
     populateCategories();
   }
+
   notifySync("Quotes synced with server!");
 }
 
@@ -222,6 +219,7 @@ function startPeriodicSync() {
   setInterval(syncWithServer, SYNC_INTERVAL);
 }
 
+// Init
 const quoteDisplay = document.getElementById("quoteDisplay");
 const formContainer = document.getElementById("formContainer");
 
@@ -230,3 +228,13 @@ populateCategories();
 createAddQuoteForm();
 restoreLastState();
 startPeriodicSync();
+
+// ✅ Attach event listeners
+document.getElementById("categoryFilter")?.addEventListener("change", filterQuotes);
+document.getElementById("syncButton")?.addEventListener("click", syncQuotes);
+document.getElementById("importFile")?.addEventListener("change", importFromJsonFile);
+document.addEventListener("click", (e) => {
+  if (e.target && e.target.id === "addQuoteBtn") {
+    addQuote();
+  }
+});
