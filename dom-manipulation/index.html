@@ -7,47 +7,54 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 2rem;
-      background-color: #f9f9f9;
+      padding: 2rem;
+      max-width: 700px;
+      margin: auto;
     }
     #quoteDisplay {
+      font-size: 1.3rem;
       margin: 20px 0;
-      padding: 15px;
-      background-color: #eef;
-      border-left: 4px solid #339;
-    }
-    input, button, select {
-      margin: 5px 0;
-      padding: 8px;
-    }
-    .form-section {
-      margin-top: 20px;
+      font-style: italic;
     }
     #syncNotice {
       color: green;
-      font-weight: bold;
+      margin: 10px 0;
+    }
+    input, select, button {
+      padding: 0.5rem;
+      margin-top: 10px;
+      font-size: 1rem;
+    }
+    button {
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <h1>Dynamic Quote Generator</h1>
 
+  <select id="categoryFilter">
+    <option value="all">All Categories</option>
+  </select>
+
+  <div id="quoteDisplay">Click below to display a random quote.</div>
+  <button id="newQuoteBtn">Show New Quote</button>
+
+  <div id="syncNotice"></div>
+
   <div>
-    <label for="categoryFilter">Choose Category:</label>
-    <select id="categoryFilter" onchange="filterQuotes()">
-      <option value="all">All Categories</option>
-    </select>
-    <button onclick="showRandomQuote()">Show New Quote</button>
-    <button onclick="exportToJson()">Export Quotes (JSON)</button>
-    <input type="file" id="importFile" accept=".json" onchange="importFromJsonFile(event)" />
-    <button onclick="syncWithServer()">🔁 Sync Now</button>
-    <p id="syncNotice"></p>
+    <button id="syncButton">Sync Now</button>
+    <button onclick="exportToJson()">Export Quotes</button>
+    <input type="file" id="importFile" accept=".json" />
   </div>
 
-  <div id="quoteDisplay">Click "Show New Quote" to display a quote.</div>
-
-  <div class="form-section" id="formContainer"></div>
+  <div id="formContainer"></div>
 
   <script src="script.js"></script>
+  <script>
+    // Extra: Bind "Show New Quote" button after DOM loads
+    document.getElementById("newQuoteBtn").addEventListener("click", showRandomQuote);
+  </script>
 </body>
 </html>
+
